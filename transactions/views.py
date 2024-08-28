@@ -9,6 +9,8 @@ from django.views.generic import CreateView, ListView
 from transactions.constants import DEPOSIT, WITHDRAWAL,LOAN, LOAN_PAID,TRANSFER_TK
 from datetime import datetime
 from django.db.models import Sum
+from django.core.mail import EmailMessage,EmailMultiAlternatives
+from django.template.loader import render_to_string
 from transactions.forms import (
     DepositForm,
     WithdrawForm,
@@ -16,6 +18,17 @@ from transactions.forms import (
     TransferForm,
 )
 from transactions.models import Transaction
+
+def send_transactions_email(user,amount,subject,template):
+        
+        message = render_to_string(template, {
+        'user': user,
+        'amount': amount,
+        })
+        send_email = EmailMultiAlternatives(subject, '', to=[user.email])
+        send_email.attach_alternative(message,"text/html")
+        send_email.send()
+
 
 class TransactionCreateMixin(LoginRequiredMixin, CreateView):
     template_name = 'transactions/transaction_form.html'
@@ -64,7 +77,7 @@ class DepositMoneyView(TransactionCreateMixin):
             self.request,
             f'{"{:,.2f}".format(float(amount))}$ was deposited to your account successfully'
         )
-
+        send_transactions_email(self.request.user,amount,"Deposite Message","transactions/deposite_email.html")
         return super().form_valid(form)
 
 
@@ -88,7 +101,7 @@ class WithdrawMoneyView(TransactionCreateMixin):
             self.request,
             f'Successfully withdrawn {"{:,.2f}".format(float(amount))}$ from your account'
         )
-
+        send_transactions_email(self.request.user,amount,"Withdrawal Message","transactions/withdrawal_email.html")
         return super().form_valid(form)
 
 class LoanRequestView(TransactionCreateMixin):
@@ -109,7 +122,7 @@ class LoanRequestView(TransactionCreateMixin):
             self.request,
             f'Loan request for {"{:,.2f}".format(float(amount))}$ submitted successfully'
         )
-
+        send_transactions_email(self.request.user,amount,"Loan Request Message","transactions/loan_email.html")
         return super().form_valid(form)
     
 class TransactionReportView(LoginRequiredMixin, ListView):
