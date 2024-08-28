@@ -199,9 +199,9 @@ class TransferAmountView(LoginRequiredMixin, View):
 
             if sender_account.balance >= amount:
                
-                # if Transaction.objects.filter(bankrupt=True).exists():
-                #     messages.error(request, 'The bank is bankrupt. Transfers are not allowed.')
-                # else:
+                if Transaction.objects.filter(bankrupt=True).exists():
+                    messages.error(request, 'The bank is bankrupt. Transfers are not allowed.')
+                else:
                     
                     sender_account.balance -= amount
                     recipient_account.balance += amount
