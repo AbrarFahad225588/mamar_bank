@@ -31,7 +31,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 # ALLOWED_HOSTS = ['198.211.99.20', 'localhost', '127.0.0.1']
-
+CSRF_TRUSTED_ORIGINS = ['https://mamar-bank-practice-1-09xs.onrender.com', 'https://*.127.0.0.1']
 
 # Application definition
 
